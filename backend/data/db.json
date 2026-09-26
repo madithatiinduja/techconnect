@@ -1,0 +1,216 @@
+{
+  "users": [
+    {
+      "id": "user-admin-1",
+      "roles": [
+        "admin"
+      ],
+      "name": "Admin Console",
+      "username": "admin",
+      "email": "admin@techconnect.com",
+      "password": "63e107e7d51ccc2ad6239d4fe0d884ec:348794e7afa000bea2955df918eb4e41ab9810251240871b2fb97fed6ea358f17ec74a4606cdcab5ce1aa8881d3b6e12b6100bf1e34e66ce5f3f7fef97e026b8",
+      "phone": "+91 90000 00000",
+      "address": "Head Office, Guntur",
+      "lat": 16.31,
+      "lng": 80.435,
+      "city": "Guntur",
+      "technicianId": null,
+      "service": "",
+      "experience": "",
+      "bio": "Platform administrator for operations and trust management.",
+      "available": false,
+      "serviceRadiusKm": 0,
+      "requirements": null,
+      "createdAt": "2026-01-05T09:00:00.000Z"
+    },
+    {
+      "id": "user-client-1",
+      "roles": [
+        "client"
+      ],
+      "name": "Ananya",
+      "username": "client",
+      "email": "client@techconnect.com",
+      "password": "da32c189442def81dbd041c3b612b780:c8e8bd4d95ede144975aa827ef28bb554d7afe9c3ce73851f3261177981cdcd791c80a505a93c637248091b72b1443462d64c9e34817d60dd1bffd0bbf8de8ae",
+      "phone": "+91 98765 43210",
+      "address": "Brodipet, Guntur, Andhra Pradesh",
+      "lat": 16.2322,
+      "lng": 80.5536,
+      "city": "Guntur",
+      "technicianId": null,
+      "service": "",
+      "experience": "",
+      "bio": "",
+      "available": false,
+      "serviceRadiusKm": 5,
+      "requirements": null,
+      "createdAt": "2026-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "user-tech-1",
+      "roles": [
+        "client",
+        "technician"
+      ],
+      "name": "Venkata Sai",
+      "username": "tech",
+      "email": "tech@techconnect.com",
+      "password": "fdecf0a9dd7ba5589411fc0089aaae5b:eed50d1bba81fa9a3b1c24669acf2b47fdd6aa9bc65ce7da0da0ebf5be434a5dc92e26d6211e9c07674184bc8b297f3cffa1a4c3a03bbb29a4ecb167354910de",
+      "phone": "+91 91234 56789",
+      "address": "Arundelpet, Guntur, Andhra Pradesh",
+      "lat": 16.235,
+      "lng": 80.551,
+      "city": "Guntur",
+      "technicianId": "tech-1",
+      "service": "AC Repair",
+      "experience": "6 years",
+      "bio": "Certified AC technician serving Arundelpet and nearby Guntur areas.",
+      "available": true,
+      "serviceRadiusKm": 10,
+      "requirements": [
+        {
+          "id": "profile_photo",
+          "label": "Profile photo",
+          "description": "Upload a clear professional photo for your public profile.",
+          "required": true,
+          "completed": true
+        },
+        {
+          "id": "id_verification",
+          "label": "ID verification",
+          "description": "Submit a valid government ID (Aadhaar, PAN, or driving licence).",
+          "required": true,
+          "completed": false
+        },
+        {
+          "id": "service_category",
+          "label": "Primary service",
+          "description": "Select the main service category you offer.",
+          "required": true,
+          "completed": true
+        },
+        {
+          "id": "service_area",
+          "label": "Service area",
+          "description": "Set your base location and how far you are willing to travel.",
+          "required": true,
+          "completed": true
+        },
+        {
+          "id": "experience",
+          "label": "Experience details",
+          "description": "Add your years of experience and a short bio.",
+          "required": true,
+          "completed": true
+        },
+        {
+          "id": "background_check",
+          "label": "Background check consent",
+          "description": "Agree to TechConnect verification and background screening.",
+          "required": true,
+          "completed": false
+        },
+        {
+          "id": "availability",
+          "label": "Availability schedule",
+          "description": "Set your weekly working hours and availability status.",
+          "required": true,
+          "completed": false
+        },
+        {
+          "id": "payment_details",
+          "label": "Payment details",
+          "description": "Add bank account or UPI details to receive payouts.",
+          "required": false,
+          "completed": false
+        }
+      ],
+      "createdAt": "2026-01-10T10:00:00.000Z"
+    },
+    {
+      "id": "user-1790068244857",
+      "roles": [
+        "client"
+      ],
+      "name": "Induja 16",
+      "username": "",
+      "email": "induja0102@gmail.com",
+      "password": "7fe0127b1ca1acff225f25444d04190a:8a3189bc543afa9afa26ba1db976c714ea738860e4033155e5ab335b1e8b38712e3e573fda6194daa51cb9770c95ccff174631671cc0b224a0a4d6490c328364",
+      "phone": "9876542112",
+      "address": "lakshmipuram",
+      "lat": null,
+      "lng": null,
+      "city": "guntur",
+      "technicianId": null,
+      "service": "",
+      "experience": "",
+      "bio": "",
+      "available": false,
+      "serviceRadiusKm": 5,
+      "requirements": null,
+      "createdAt": "2026-09-22T09:10:44.969Z"
+    }
+  ],
+  "orders": [
+    {
+      "id": "order-1790068254458",
+      "clientId": "user-1790068244857",
+      "technicianId": 13,
+      "technicianName": "Test Technician",
+      "service": "Electrician",
+      "status": "accepted",
+      "price": 1,
+      "address": "lakshmipuram",
+      "lat": 16.2322,
+      "lng": 80.5536,
+      "paymentMethod": "upi",
+      "paymentStatus": "paid",
+      "paidAt": "2026-09-22T09:12:13.472Z",
+      "paymentSubmittedAt": null,
+      "securityCode": "6215",
+      "technicianPhone": "+91 90101 11013",
+      "technicianStartLat": 16.231,
+      "technicianStartLng": 80.554,
+      "scheduledAt": "2026-09-22T10:10:00.000Z",
+      "createdAt": "2026-09-22T09:10:54.459Z",
+      "completedAt": null,
+      "acceptedAt": "2026-09-22T09:12:13.472Z",
+      "startedAt": null
+    },
+    {
+      "id": "order-1790068272744",
+      "clientId": "user-1790068244857",
+      "technicianId": 13,
+      "technicianName": "Test Technician",
+      "service": "Electrician",
+      "status": "pending",
+      "price": 1,
+      "address": "lakshmipuram",
+      "lat": 16.2322,
+      "lng": 80.5536,
+      "paymentMethod": "cash",
+      "paymentStatus": "pending",
+      "paidAt": null,
+      "paymentSubmittedAt": null,
+      "securityCode": "5347",
+      "technicianPhone": "+91 90101 11013",
+      "technicianStartLat": 16.231,
+      "technicianStartLng": 80.554,
+      "scheduledAt": "2026-09-22T10:11:00.000Z",
+      "createdAt": "2026-09-22T09:11:12.745Z",
+      "completedAt": null,
+      "acceptedAt": null,
+      "startedAt": null
+    }
+  ],
+  "sessions": {
+    "0096a1363ec7f938cabd2cd4d8afdcd6a970fcced09a0ebdb0497aab2610580f": {
+      "userId": "user-admin-1",
+      "createdAt": "2026-09-22T09:08:39.668Z"
+    },
+    "fc1a9fbc5fc73f0760d5bbd30ce7e1d1f3831c3fb0f9d007aad0bd6c15add8a9": {
+      "userId": "user-admin-1",
+      "createdAt": "2026-09-22T09:11:59.716Z"
+    }
+  }
+}
