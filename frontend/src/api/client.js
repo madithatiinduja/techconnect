@@ -1,4 +1,4 @@
-const API_BASE = "/api";;
+const API_BASE = "/api";
 const TOKEN_KEY = "techconnect_token";
 const SECURITY_CODE_PREFIX = "techconnect_security_code_";
 const TRACKING_SPEED_KMPH = 22;
