@@ -51,7 +51,17 @@ router.get("/:id", (req, res) => {
 
 router.post("/", requireRole("client"), (req, res) => {
   removeDuplicatePendingOrders();
-  const { technicianId, service, price, address, lat, lng, scheduledAt } = req.body;
+  const {
+    technicianId,
+    service,
+    price,
+    address,
+    lat,
+    lng,
+    scheduledAt,
+    paymentMethod,
+    paymentStatus,
+  } = req.body;
   const client = findUserById(req.user.id);
 
   if (!technicianId || !service) {
@@ -63,6 +73,9 @@ router.post("/", requireRole("client"), (req, res) => {
     return res.status(404).json({ error: "Technician not found" });
   }
 
+  const paymentMethodValue = paymentMethod || "cash";
+  const paymentStatusValue = "pending";
+
   const order = createOrder({
     clientId: client.id,
     technicianId: technician.id,
@@ -73,9 +86,25 @@ router.post("/", requireRole("client"), (req, res) => {
     lat: lat ?? client.lat,
     lng: lng ?? client.lng,
     scheduledAt,
+    paymentMethod: paymentMethodValue,
+    paymentStatus: paymentStatusValue,
   });
 
   res.status(201).json({ order: getOrderView(order) });
+});
+
+router.patch("/:id/payment-submitted", requireRole("client"), (req, res) => {
+  const order = findOrderById(req.params.id);
+  if (!order || order.clientId !== req.user.id) {
+    return res.status(404).json({ error: "Order not found" });
+  }
+
+  if (order.paymentStatus === "paid") {
+    return res.json({ order: getOrderView(order) });
+  }
+
+  order.paymentSubmittedAt = order.paymentSubmittedAt || new Date().toISOString();
+  res.json({ order: getOrderView(order) });
 });
 
 router.patch("/:id", (req, res) => {
@@ -108,8 +137,30 @@ router.patch("/:id", (req, res) => {
   }
 
   order.status = status;
+  if (status === "accepted") {
+    order.acceptedAt = order.acceptedAt || new Date().toISOString();
+  }
+  if (status === "in_progress") {
+    order.startedAt = order.startedAt || new Date().toISOString();
+  }
   if (status === "completed") {
-    order.completedAt = new Date().toISOString();
+    order.completedAt = order.completedAt || new Date().toISOString();
+  }
+
+  res.json({ order: getOrderView(order) });
+});
+
+router.patch("/:id/payment", requireRole("admin"), (req, res) => {
+  const order = findOrderById(req.params.id);
+  if (!order) {
+    return res.status(404).json({ error: "Order not found" });
+  }
+
+  order.paymentStatus = "paid";
+  order.paidAt = new Date().toISOString();
+  if (order.status === "pending") {
+    order.status = "accepted";
+    order.acceptedAt = new Date().toISOString();
   }
 
   res.json({ order: getOrderView(order) });

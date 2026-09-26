@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { fetchOrderById } from "../api/client.js";
 import BottomNavigation from "../components/BottomNavigation.jsx";
 import Header from "../components/Header.jsx";
@@ -18,8 +18,11 @@ function formatEta(etaMinutes) {
   return minutes === 0 ? `${hours} hr` : `${hours} hr ${minutes} min`;
 }
 
+const UPI_PAYMENT_ID = "9390719199-2@ybl";
+
 export default function BookingTrackingPage() {
   const { orderId } = useParams();
+  const [searchParams] = useSearchParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -49,6 +52,14 @@ export default function BookingTrackingPage() {
   }, [loadOrder]);
 
   const tracking = order?.tracking;
+  const paymentSubmitted = searchParams.get("payment") === "submitted";
+  const paymentQrUrl = useMemo(() => {
+    if (order?.payment?.method !== "upi") return "";
+    const encoded = encodeURIComponent(
+      `upi://pay?pa=${UPI_PAYMENT_ID}&pn=TechConnect Services&am=${Number(order.price) || 0}&cu=INR&tn=TechConnect booking - ${order.service || "service"}`
+    );
+    return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encoded}`;
+  }, [order?.payment?.method, order?.price, order?.service]);
   const telHref = useMemo(() => {
     const raw = order?.technicianPhone || "";
     return `tel:${raw.replace(/\s+/g, "")}`;
@@ -153,7 +164,7 @@ export default function BookingTrackingPage() {
                     />
                   </div>
 
-                  <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  <div className="mt-4 grid gap-3 sm:grid-cols-4">
                     <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-100">
                       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                         ETA
@@ -178,6 +189,21 @@ export default function BookingTrackingPage() {
                         Rs {order.price}
                       </p>
                     </div>
+                    <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-100">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                        Payment
+                      </p>
+                      <p className="mt-1 text-sm font-extrabold uppercase text-slate-900">
+                        {order.payment?.method || "cash"}
+                      </p>
+                      <p className="text-[11px] font-medium text-slate-500">
+                        {order.payment?.status === "paid"
+                          ? "Paid"
+                          : order.payment?.submittedAt
+                            ? "Submitted, awaiting admin"
+                            : "Pending"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </section>
@@ -194,6 +220,32 @@ export default function BookingTrackingPage() {
                 </p>
               </section>
             </div>
+
+            {order.payment?.method === "upi" && order.payment?.status !== "paid" && !paymentSubmitted && (
+              <section className="section-card">
+                <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:text-left">
+                  <div className="rounded-2xl border-4 border-slate-200 bg-white p-2">
+                    <img
+                      src={paymentQrUrl}
+                      alt="UPI payment QR code"
+                      className="h-44 w-44 object-contain"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
+                      Payment awaiting admin confirmation
+                    </p>
+                    <h2 className="mt-1 text-xl font-extrabold text-slate-900">
+                      Scan to pay Rs {order.price}
+                    </h2>
+                    <p className="mt-2 text-sm text-slate-500">
+                      Complete the UPI payment, then wait for the admin to accept the payment and booking.
+                    </p>
+                    <p className="mt-2 text-sm font-bold text-slate-700">{UPI_PAYMENT_ID}</p>
+                  </div>
+                </div>
+              </section>
+            )}
 
             <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
               <section className="section-card">
@@ -268,6 +320,14 @@ export default function BookingTrackingPage() {
                       Order ID
                     </p>
                     <p className="mt-1 font-medium text-slate-800">{order.id}</p>
+                  </div>
+                  <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      Payment status
+                    </p>
+                    <p className="mt-1 font-medium capitalize text-slate-800">
+                      {order.payment?.status || "pending"} via {order.payment?.method || "cash"}
+                    </p>
                   </div>
                 </div>
               </section>

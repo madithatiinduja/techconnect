@@ -1,0 +1,90 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath}
+\usepackage{url}
+
+\title{TechConnect: A Geospatial Marketplace Prototype for Discovering Local Service Technicians}
+
+\author{
+\IEEEauthorblockN{[Author Name(s)]}
+\IEEEauthorblockA{[Department and Institution]\\
+[City, Country]\\
+[Email address(es)]}
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Finding a suitable local service technician requires customers to compare service category, distance, price, experience, and trust cues, while technicians need a way to receive and manage service requests. This paper presents TechConnect, a web-based marketplace prototype that supports location-aware technician discovery and a basic booking lifecycle. A React client obtains a browser location, allows the customer to select a service and a search radius, and queries an Express API. The API computes great-circle distance from the customer to each technician using the Haversine formula, applies service, radius, and optional trusted-status filters, and returns candidates ordered by distance. The application also implements account registration and sign-in, role-based client and technician dashboards, order-status updates, and administrative views. The prototype is built around a seeded technician catalog centered on Guntur, India; user and order state is persisted locally in a JSON file. It is therefore a functional demonstration, not a production marketplace. The trust indicator is not evidence of a completed external background check, displayed trip progress is estimated rather than GPS-derived, and the repository contains no user study or performance measurements. The paper documents the architecture and matching method, identifies these limitations, and outlines an evaluation plan needed before drawing conclusions about effectiveness or scalability.
+\end{abstract}
+
+\begin{IEEEkeywords}
+local services, geospatial search, two-sided marketplace, Haversine distance, technician discovery, web application
+\end{IEEEkeywords}
+
+\section{Introduction}
+On-demand service marketplaces connect customers with independent providers and depend on search, matching, and trust mechanisms to make transactions convenient \cite{einav2016}. For household repair and maintenance, geographic proximity is especially relevant: customers often need a provider who serves their area, while providers operate within practical travel limits. A useful discovery interface should combine location with service type and understandable provider information.
+
+TechConnect is a full-stack prototype for discovering and booking nearby technicians. Its primary contribution is an implemented end-to-end workflow that combines radius-based discovery, service and trusted-status filters, provider comparison, authenticated booking, and role-specific order management. It is a demonstration of this workflow rather than a new geographic algorithm or a validated commercial service.
+
+The current implementation uses a predefined catalog with coordinates around Guntur, Andhra Pradesh, India. A customer may use browser geolocation or the configured fallback location, choose a service category, adjust the search radius, and optionally request technicians marked as trusted. The application presents returned providers with profile details and supports booking for signed-in clients. Technicians can manage job status through a dashboard, and administrators can inspect orders and payment state.
+
+This paper makes three practical contributions: (1) it describes a modular client--API architecture for a local-services discovery workflow; (2) it formalizes the prototype's geographic candidate retrieval and sorting process; and (3) it records implementation constraints that shape the validity of any future evaluation. No claim is made that the current seed data establishes real-world trust, that estimated movement is live tracking, or that the prototype has demonstrated improved booking outcomes.
+
+\section{Related Work}
+Peer-to-peer markets lower search and transaction friction between buyers and small suppliers. Search and matching, reputation, and certification are among the design mechanisms that influence how participants find and assess one another \cite{einav2016}. TechConnect follows this general pattern by exposing a catalog of local providers and combining geographic and categorical selection with profile information.
+
+Reputation systems can help participants make decisions when direct knowledge of a counterparty is limited, but their usefulness depends on how evidence is collected and represented \cite{resnick2000}. TechConnect displays ratings and a trusted-status field in its demonstration catalog. These fields are illustrative data, not a validated reputation model or an independently audited verification process. Interface-level trust cues should not be interpreted as proof of identity, competence, or safety.
+
+For geographic ranking, TechConnect uses the Haversine relation to estimate great-circle distance between two latitude--longitude coordinates on a spherical Earth. The method is a standard way to compute such distances from angular coordinates \cite{sinnott1984}. It is appropriate for the prototype's radius filter, but it does not model road-network distance, travel time, traffic, or provider service-area constraints.
+
+\section{System Design}
+\subsection{Architecture}
+The system has a React single-page client and a Node.js/Express REST API. The client contains the discovery interface, account context, protected routes, booking pages, and client, technician, and administrator dashboards. Requests are sent to API routes for technician search, authentication, orders, and dashboard data. The backend separates route handlers, authentication middleware, technician seed data, persistence utilities, and distance calculation.
+
+The technician catalog is defined in backend source as a fixed set of 13 demonstration records. Each record includes a service category, coordinates, rating and review counts, a price, an availability value, and a trusted flag. User accounts and orders are read from and written to a local JSON file. Passwords are stored as salted scrypt hashes, and authenticated API calls use bearer session tokens. This storage and session design is suitable only for a local prototype: it does not provide a transactional database, distributed session management, or production-grade operational controls.
+
+\subsection{Discovery Workflow}
+The client requests a geographic position from the browser. If location access is unavailable or fails, the interface retains its configured fallback coordinates. The user selects a service category, a radius from 1 to 50 km, and optionally the trusted-only filter. The client sends latitude, longitude, radius, and selected filters to the technician-search endpoint. The API validates that latitude and longitude parse as numbers, calculates distances for catalog records, filters the resulting set, and sorts eligible results in ascending distance order.
+
+For a query point $(\phi_1,\lambda_1)$ and technician point $(\phi_2,\lambda_2)$, the implementation converts angular differences to radians and computes
+\begin{align}
+ a &= \sin^2\left(\frac{\Delta\phi}{2}\right)
+ + \cos(\phi_1)\cos(\phi_2)
+   \sin^2\left(\frac{\Delta\lambda}{2}\right),\\
+ d &= 2R\operatorname{atan2}\left(\sqrt{a},\sqrt{1-a}\right),
+\end{align}
+where $\Delta\phi=\phi_2-\phi_1$, $\Delta\lambda=\lambda_2-\lambda_1$, and $R=6371$ km. A candidate is included when its computed distance is no greater than the requested radius. If supplied, the service filter uses an exact category match; the trusted-only option retains records whose trusted flag is true. The final list is sorted from nearest to farthest.
+
+For $n$ catalog entries, computing distances takes $O(n)$ time, and sorting the filtered results takes at most $O(n\log n)$ time. The current catalog is small, so these bounds describe the implementation but do not establish practical throughput or scalability. The current search does not exclude records based on the availability field, and the server does not enforce the interface's 1--50 km radius range; these are implementation constraints rather than intended matching guarantees.
+
+\subsection{Booking and Order Management}
+Signed-in clients can create an order for a selected technician. Orders record customer and technician identifiers, service, price, address and coordinates, schedule, payment fields, timestamps, and a status. The client dashboard exposes booking history and cancellation of pending orders. Technicians can accept work, mark it in progress, and complete it. An administrator can inspect orders and update payment state. API middleware applies authentication and role checks to protected operations.
+
+The tracking view derives an estimated position by interpolating between technician and customer coordinates. Progress is influenced by order status and elapsed time, and the estimated arrival time uses a fixed assumed speed of 22 km/h. No device-location stream or external routing service supplies these values; they are a visual estimate for the demo, not live tracking or a travel-time prediction validated against journeys.
+
+\section{Implementation}
+The user interface is implemented with React and Vite and styled with Tailwind CSS. React Router provides page navigation, while a shared authentication context exposes the signed-in user and role state. Browser geolocation is accessed through the Web Geolocation API. The Express API exposes public service and technician-search endpoints alongside protected authentication, order, and dashboard routes.
+
+Technician search is stateless per request: the client supplies its current coordinates and filters, and the API evaluates the catalog and returns a result count, query location, radius, and ordered technician records. User and order changes are persisted to a JSON file by backend utilities. This keeps local setup simple but introduces limitations in concurrent writes, query performance, backup, and multi-instance deployment. The fixed technician catalog is distinct from registered technician accounts, so the repository does not demonstrate a complete onboarding-to-search publication pipeline.
+
+Trust is represented by a boolean field in seed records. Although the technician interface contains onboarding requirement controls, the demonstration does not verify uploaded identity documents with an external service; file selections are not securely uploaded for independent review. Accordingly, the trusted-only filter demonstrates filtering behavior, not a secure credentialing system. Ratings and review totals in the catalog are seeded values and are not produced by a demonstrated review-integrity workflow.
+
+\section{Evaluation Status and Limitations}
+The repository contains no automated test suite, benchmark, or documented study with customers or technicians. Thus, this paper reports a design and implementation, not measured search accuracy, latency, usability, trust, or booking success. The 13 seeded technician records are insufficient to support conclusions about geographic coverage or production load. No numerical experimental results are reported.
+
+Several limitations should guide interpretation. First, straight-line distance is not route distance and may poorly represent travel time. Second, availability is displayed but is not applied as a search eligibility condition. Third, verification and ratings are demonstrative rather than independently validated. Fourth, estimated tracking uses coordinate interpolation and a constant speed. Fifth, local JSON persistence and browser local-storage tokens are not suitable security or concurrency guarantees for a deployed marketplace. Finally, the repository does not establish deployment scale, accessibility conformance, or user acceptance.
+
+A future evaluation should use a larger, permissioned dataset with verified coordinates and explicit availability windows. Functional tests should cover filter combinations, radius boundaries, role authorization, and order transitions. Search latency should be measured over increasing catalog sizes and compared with an indexed geospatial store. A usability study with customers and technicians should measure task completion, time to identify a suitable provider, and perceived clarity of trust information. Trust claims should be tied to a documented verification process and reviewed for privacy, consent, and data-retention requirements. Any study involving participants should follow the relevant institutional ethics and consent process.
+
+\section{Conclusion}
+TechConnect implements a prototype workflow for location-aware technician discovery and booking. Its Haversine-based query combines radius, service category, and an optional trusted flag, and orders matching records by straight-line distance. The surrounding application demonstrates authentication, role-specific dashboards, and basic order management. The implementation is a prototype: its catalog and trust data are seeded, persistence is file-based, availability is not a search constraint, and tracking is estimated rather than GPS-derived. A controlled functional, performance, and user evaluation is required before making claims about practical effectiveness or deployment readiness.
+
+\begin{thebibliography}{00}
+\bibitem{einav2016} L. Einav, C. Farronato, and J. Levin, ``Peer-to-peer markets,'' \emph{Annual Review of Economics}, vol. 8, pp. 615--635, 2016, doi: 10.1146/annurev-economics-080315-015334.
+\bibitem{resnick2000} P. Resnick, R. Zeckhauser, E. Friedman, and K. Kuwabara, ``Reputation systems,'' \emph{Communications of the ACM}, vol. 43, no. 12, pp. 45--48, Dec. 2000, doi: 10.1145/355112.355122.
+\bibitem{sinnott1984} R. W. Sinnott, ``Virtues of the Haversine,'' \emph{Sky \& Telescope}, vol. 68, no. 2, p. 159, 1984.
+\end{thebibliography}
+
+\end{document}

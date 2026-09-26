@@ -30,7 +30,7 @@ export function authMiddleware(req, res, next) {
 
 export function requireRole(...roles) {
   return (req, res, next) => {
-    if (!req.user || !req.user.roles || !roles.some(role => req.user.roles.includes(role))) {
+    if (!req.user || !req.user.roles || !roles.some((role) => req.user.roles.includes(role))) {
       return res.status(403).json({ error: "You do not have access to this resource" });
     }
     next();

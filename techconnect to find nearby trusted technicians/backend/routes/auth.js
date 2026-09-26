@@ -3,8 +3,10 @@ import {
   createUser,
   findUserByEmail,
   findUserById,
+  findUserByUsername,
+  saveSession,
   sanitizeUser,
-  store,
+  removeSession,
   verifyPassword,
 } from "../data/store.js";
 import { authMiddleware, createSession } from "../middleware/auth.js";
@@ -12,19 +14,23 @@ import { authMiddleware, createSession } from "../middleware/auth.js";
 const router = Router();
 
 router.post("/register", (req, res) => {
-  const { name, email, password, role, phone, address, city, service, experience } =
+  const { name, username, email, password, role, phone, address, city, service, experience } =
     req.body;
-
-  if (!name?.trim() || !email?.trim() || !password || !role) {
-    return res.status(400).json({ error: "Name, email, password, and role are required" });
-  }
 
   // Validate role(s) - can be single string or array
   const roles = Array.isArray(role) ? role : [role];
-  const validRoles = ["client", "technician"];
-  const invalidRoles = roles.filter(r => !validRoles.includes(r));
+  const validRoles = ["client", "technician", "admin"];
+  const invalidRoles = roles.filter((r) => !validRoles.includes(r));
   if (invalidRoles.length > 0) {
     return res.status(400).json({ error: "Invalid role(s) provided" });
+  }
+
+  if (!password || !role || (roles.includes("admin") ? !username?.trim() : !name?.trim() || !email?.trim())) {
+    return res.status(400).json({
+      error: roles.includes("admin")
+        ? "Username, password, and role are required"
+        : "Name, email, password, and role are required",
+    });
   }
 
   if (password.length < 6) {
@@ -39,8 +45,13 @@ router.post("/register", (req, res) => {
     return res.status(409).json({ error: "An account with this email already exists" });
   }
 
+  if (findUserByUsername(username)) {
+    return res.status(409).json({ error: "That username is already taken" });
+  }
+
   const user = createUser({
-    name,
+    name: name || username,
+    username,
     email,
     password,
     role,
@@ -52,7 +63,7 @@ router.post("/register", (req, res) => {
   });
 
   const token = createSession(user.id);
-  store.sessions.set(token, { userId: user.id, createdAt: new Date().toISOString() });
+  saveSession(token, user.id);
 
   res.status(201).json({
     token,
@@ -61,19 +72,20 @@ router.post("/register", (req, res) => {
 });
 
 router.post("/login", (req, res) => {
-  const { email, password } = req.body;
+  const { email, username, password } = req.body;
+  const identifier = username || email;
 
-  if (!email?.trim() || !password) {
-    return res.status(400).json({ error: "Email and password are required" });
+  if (!identifier?.trim() || !password) {
+    return res.status(400).json({ error: "Username/email and password are required" });
   }
 
-  const user = findUserByEmail(email);
+  const user = findUserByUsername(identifier) || findUserByEmail(identifier);
   if (!user || !verifyPassword(password, user.password)) {
     return res.status(401).json({ error: "Invalid email or password" });
   }
 
   const token = createSession(user.id);
-  store.sessions.set(token, { userId: user.id, createdAt: new Date().toISOString() });
+  saveSession(token, user.id);
 
   res.json({
     token,
@@ -82,7 +94,7 @@ router.post("/login", (req, res) => {
 });
 
 router.post("/logout", authMiddleware, (req, res) => {
-  store.sessions.delete(req.token);
+  removeSession(req.token);
   res.json({ message: "Signed out successfully" });
 });
 

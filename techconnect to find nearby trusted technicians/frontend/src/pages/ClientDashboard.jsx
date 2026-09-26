@@ -187,6 +187,9 @@ export default function ClientDashboard() {
                         <p className="text-xs text-slate-500">
                           Scheduled: {formatOrderDate(order.scheduledAt)}
                         </p>
+                        <p className={`text-xs font-semibold ${order.payment?.status === "paid" ? "text-emerald-600" : order.payment?.submittedAt ? "text-amber-600" : "text-slate-500"}`}>
+                          Payment: {order.payment?.status === "paid" ? "Paid" : order.payment?.submittedAt ? "Submitted, awaiting admin" : "Pending"}
+                        </p>
                       </div>
                       <div className="text-left sm:text-right">
                         <p className="text-lg font-extrabold text-brand-700">₹{order.price}</p>

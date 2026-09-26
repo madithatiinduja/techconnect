@@ -49,28 +49,41 @@ const ICONS = {
 };
 
 export default function BottomNavigation() {
-  const { user, isClient, isTechnician } = useAuth();
+  const { user, isClient, isTechnician, isAdmin } = useAuth();
   const location = useLocation();
 
   if (!user) return null;
 
-  const navItems = [
-    {
-      path: "/",
-      label: "Home",
-      icon: ICONS.home,
-    },
-    {
-      path: isClient ? "/dashboard/client" : "/dashboard/technician",
-      label: "Bookings",
-      icon: ICONS.bookings,
-    },
-    {
-      path: "/profile",
-      label: "Profile",
-      icon: ICONS.profile,
-    },
-  ];
+  const navItems = isAdmin
+    ? [
+        {
+          path: "/dashboard/admin",
+          label: "Admin",
+          icon: ICONS.bookings,
+        },
+        {
+          path: "/profile",
+          label: "Profile",
+          icon: ICONS.profile,
+        },
+      ]
+    : [
+        {
+          path: "/",
+          label: "Home",
+          icon: ICONS.home,
+        },
+        {
+          path: isClient ? "/dashboard/client" : "/dashboard/technician",
+          label: "Bookings",
+          icon: ICONS.bookings,
+        },
+        {
+          path: "/profile",
+          label: "Profile",
+          icon: ICONS.profile,
+        },
+      ];
 
   const isActive = (path) => {
     if (path === "/") return location.pathname === "/";

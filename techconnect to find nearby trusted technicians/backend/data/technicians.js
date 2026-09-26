@@ -191,6 +191,22 @@ export const technicians = [
     available: true,
     image: "https://api.dicebear.com/9.x/avataaars/svg?seed=AnushaLakshmi",
   },
+  {
+    id: 13,
+    name: "Test Technician",
+    service: "Electrician",
+    rating: 5,
+    reviews: 1,
+    trusted: true,
+    experience: "1 year",
+    price: 1,
+    lat: 16.231,
+    lng: 80.554,
+    city: "Guntur",
+    phone: "+91 90101 11013",
+    available: true,
+    image: "https://api.dicebear.com/9.x/avataaars/svg?seed=TestTechnician",
+  },
 ];
 
 export const services = [

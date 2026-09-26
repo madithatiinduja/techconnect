@@ -105,15 +105,33 @@ function buildTracking(order, technician) {
     };
   }
 
+  const statusStart =
+    order.status === "completed"
+      ? order.completedAt || order.createdAt
+      : order.status === "in_progress"
+        ? order.startedAt || order.acceptedAt || order.createdAt
+        : order.status === "accepted"
+          ? order.acceptedAt || order.createdAt
+          : order.createdAt;
+
   const elapsedMinutes = Math.max(
     0,
-    Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 60000)
+    Math.floor((Date.now() - new Date(statusStart).getTime()) / 60000)
   );
-  const rawProgress = totalEtaMinutes === 0 ? 1 : elapsedMinutes / totalEtaMinutes;
+
+  const baselineProgress = {
+    pending: 0.08,
+    accepted: 0.32,
+    in_progress: 0.5,
+    completed: 1,
+  };
+
+  const statusBase = baselineProgress[order.status] ?? 0.08;
   const progress =
     order.status === "completed"
       ? 1
-      : clamp(rawProgress === 0 ? 0.08 : rawProgress, 0.08, 0.96);
+      : clamp(statusBase + elapsedMinutes / (totalEtaMinutes * 1.6), 0.08, 0.96);
+
   const currentLat = interpolateCoordinate(technician.lat, order.lat, progress);
   const currentLng = interpolateCoordinate(technician.lng, order.lng, progress);
   const remainingDistanceKm =
@@ -215,10 +233,10 @@ export async function fetchTechnicianById(technicianId, { lat, lng } = {}) {
   }
 }
 
-export async function login({ email, password }) {
+export async function login({ email, username, password }) {
   return request("/auth/login", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, username, password }),
   });
 }
 
@@ -277,6 +295,18 @@ export async function updateOrderStatus(orderId, status) {
   });
 }
 
+export async function acceptOrderPayment(orderId) {
+  return request(`/orders/${orderId}/payment`, {
+    method: "PATCH",
+  });
+}
+
+export async function markPaymentSubmitted(orderId) {
+  return request(`/orders/${orderId}/payment-submitted`, {
+    method: "PATCH",
+  });
+}
+
 export async function fetchClientDashboard() {
   return request("/dashboard/client");
 }
@@ -290,6 +320,10 @@ export async function updateClientProfile(payload) {
 
 export async function fetchTechnicianDashboard() {
   return request("/dashboard/technician");
+}
+
+export async function fetchAdminDashboard() {
+  return request("/dashboard/admin");
 }
 
 export async function updateTechnicianProfile(payload) {

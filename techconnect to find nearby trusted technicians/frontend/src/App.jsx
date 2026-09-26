@@ -3,6 +3,7 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import BottomNavigation from "./components/BottomNavigation.jsx";
 import BookingPage from "./pages/BookingPage.jsx";
 import BookingTrackingPage from "./pages/BookingTrackingPage.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
 import ClientDashboard from "./pages/ClientDashboard.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
@@ -54,6 +55,14 @@ export default function App() {
           element={
             <ProtectedRoute role="technician">
               <TechnicianDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/admin"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminDashboard />
             </ProtectedRoute>
           }
         />

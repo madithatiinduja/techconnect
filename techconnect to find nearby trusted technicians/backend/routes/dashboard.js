@@ -153,4 +153,67 @@ router.patch("/technician", requireRole("technician"), (req, res) => {
   });
 });
 
+router.get("/admin", requireRole("admin"), (req, res) => {
+  removeDuplicatePendingOrders();
+
+  const technicians = store.users
+    .filter((user) => user.roles?.includes("technician"))
+    .map((user) => ({
+      id: user.technicianId ?? user.id,
+      name: user.name,
+      service: user.service || "General Service",
+      rating: 4.8,
+      distanceKm: 2.4,
+      city: user.city || "Guntur",
+      experience: user.experience || "New",
+      trusted: Boolean(user.requirements?.every((item) => item.completed) || user.service),
+    }))
+    .slice(0, 8);
+
+  const orders = store.orders
+    .slice()
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .map((order) => {
+      const client = findUserById(order.clientId);
+      const technician = findUserById(store.users.find((user) => user.technicianId === order.technicianId)?.id || "");
+      return {
+        id: order.id,
+        service: order.service,
+        status: order.status,
+        price: order.price,
+        paymentStatus: order.paymentStatus || "pending",
+        paymentMethod: order.paymentMethod || "cash",
+        paymentSubmittedAt: order.paymentSubmittedAt || null,
+        createdAt: order.createdAt,
+        clientName: client?.name || "Unknown client",
+        technicianName: technician?.name || order.technicianName || "Unassigned",
+      };
+    });
+
+  const verifiedTechnicians = technicians.filter((tech) => tech.trusted).length;
+  const pendingOrders = orders.filter((order) => order.status === "pending").length;
+  const activeJobs = orders.filter((order) => ["accepted", "in_progress"].includes(order.status)).length;
+
+  res.json({
+    profile: sanitizeUser(findUserById(req.user.id)),
+    stats: {
+      totalOrders: orders.length,
+      pending: pendingOrders,
+      verifiedTechnicians,
+      activeJobs,
+    },
+    trust: {
+      verified: verifiedTechnicians,
+      verificationRate: technicians.length ? Math.round((verifiedTechnicians / technicians.length) * 100) : 0,
+    },
+    summary: {
+      areas: "3 active zones",
+      avgResponse: "12 mins",
+      rating: "4.8 / 5",
+    },
+    orders,
+    technicians,
+  });
+});
+
 export default router;

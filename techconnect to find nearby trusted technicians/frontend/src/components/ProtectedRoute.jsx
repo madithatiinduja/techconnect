@@ -2,7 +2,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 
 export default function ProtectedRoute({ children, role }) {
-  const { user, loading, isClient, isTechnician } = useAuth();
+  const { user, loading, isClient, isTechnician, isAdmin } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -19,7 +19,11 @@ export default function ProtectedRoute({ children, role }) {
 
   if (role && !user.roles?.includes(role)) {
     // If user doesn't have the required role, redirect to a dashboard they do have access to
-    const redirect = isTechnician ? "/dashboard/technician" : "/dashboard/client";
+    const redirect = isAdmin
+      ? "/dashboard/admin"
+      : isTechnician
+        ? "/dashboard/technician"
+        : "/dashboard/client";
     return <Navigate to={redirect} replace />;
   }
 

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Header() {
-  const { user, logout, isClient, isTechnician } = useAuth();
+  const { user, logout, isClient, isTechnician, isAdmin } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl">
@@ -54,12 +54,20 @@ export default function Header() {
                   </Link>
                 </div>
               )}
-              {!(isClient && isTechnician) && (
+              {!(isClient && isTechnician) && !isAdmin && (
                 <Link
                   to={isTechnician ? "/dashboard/technician" : "/dashboard/client"}
                   className="hidden rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:inline-flex"
                 >
                   Dashboard
+                </Link>
+              )}
+              {isAdmin && (
+                <Link
+                  to="/dashboard/admin"
+                  className="hidden rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:inline-flex"
+                >
+                  Admin dashboard
                 </Link>
               )}
               <div className="hidden items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 sm:flex">

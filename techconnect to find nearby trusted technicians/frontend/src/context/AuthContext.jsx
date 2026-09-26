@@ -68,6 +68,7 @@ export function AuthProvider({ children }) {
       isAuthenticated: Boolean(user),
       isClient: user?.roles?.includes("client"),
       isTechnician: user?.roles?.includes("technician"),
+      isAdmin: user?.roles?.includes("admin"),
       login,
       register,
       logout,
