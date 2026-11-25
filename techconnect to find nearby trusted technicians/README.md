@@ -197,6 +197,8 @@ npm run dev:frontend
 
 ### 3. Access the Application
 
+- **Live Frontend:** https://techconnect-xi.vercel.app
+- **Live Backend:** https://techconnect-api.onrender.com
 - **Frontend:** http://localhost:5173
 - **Backend API:** http://localhost:5000
 - **API Health Check:** http://localhost:5000/api/health
@@ -214,7 +216,10 @@ This admin account is used to review bookings, approve payment submissions, and 
 
 ## API Endpoints
 
-### Base URL: `http://localhost:5000`
+### Base URLs
+
+- **Production:** `https://techconnect-api.onrender.com/api`
+- **Local:** `http://localhost:5000/api`
 
 ### Public Endpoints
 
@@ -245,6 +250,14 @@ curl "http://localhost:5000/api/technicians?lat=16.235&lng=80.551&radius=10"
 # Find only trusted electricians within 5 km
 curl "http://localhost:5000/api/technicians?lat=16.235&lng=80.551&radius=5&service=Electrician&trusted=true"
 ```
+
+## Deployment
+
+- **Frontend:** [TechConnect on Vercel](https://techconnect-xi.vercel.app)
+- **Backend:** [TechConnect API on Render](https://techconnect-api.onrender.com)
+- Set the Render environment variable `CORS_ORIGIN=https://techconnect-xi.vercel.app`
+- Set the Vercel environment variable `VITE_API_BASE_URL=https://techconnect-api.onrender.com/api`
+- Redeploy the frontend after configuring `VITE_API_BASE_URL`
 
 ### Protected Endpoints (Require Authentication)
 

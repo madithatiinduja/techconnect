@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: techconnect-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: CORS_ORIGIN
+        sync: false
+    disk:
+      name: techconnect-data
+      mountPath: /opt/render/project/src/backend/data
+      sizeGB: 1

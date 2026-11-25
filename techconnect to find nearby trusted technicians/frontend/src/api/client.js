@@ -1,4 +1,4 @@
-const API_BASE = "/api";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/$/, "");
 const TOKEN_KEY = "techconnect_token";
 const SECURITY_CODE_PREFIX = "techconnect_security_code_";
 const TRACKING_SPEED_KMPH = 22;
