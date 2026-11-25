@@ -197,6 +197,8 @@ npm run dev:frontend
 
 ### 3. Access the Application
 
+- **Live Frontend:** https://techconnect-xi.vercel.app
+- **Live Backend:** https://techconnect-api.onrender.com
 - **Frontend:** http://localhost:5173
 - **Backend API:** http://localhost:5000
 - **API Health Check:** http://localhost:5000/api/health

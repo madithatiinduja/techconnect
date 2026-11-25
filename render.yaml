@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: techconnect-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: CORS_ORIGIN
+        value: https://techconnect-xi.vercel.app

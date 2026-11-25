@@ -9,7 +9,16 @@ import dashboardRoutes from "./routes/dashboard.js";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+const configuredOrigins = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin: configuredOrigins.length > 0 ? configuredOrigins : true,
+  })
+);
 app.use(express.json());
 
 app.get("/api/health", (_req, res) => {
