@@ -3,14 +3,18 @@
   "short_name": "TechConnect",
   "description": "Find trusted technicians nearby",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
+  "categories": ["business", "lifestyle"],
   "background_color": "#f8fafc",
   "theme_color": "#2554eb",
   "icons": [
     {
       "src": "/favicon.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }

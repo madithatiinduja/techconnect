@@ -95,6 +95,18 @@ app.get("/api/technicians", (req, res) => {
     .filter((tech) => tech.distanceKm <= radiusKm)
     .sort((a, b) => a.distanceKm - b.distanceKm);
 
+  if (results.length === 0 && !service && !trustedOnly) {
+    results = combinedTechnicians
+      .map((tech) => ({
+        ...tech,
+        distanceKm: Number(
+          haversineDistanceKm(lat, lng, tech.lat, tech.lng).toFixed(2)
+        ),
+      }))
+      .sort((a, b) => a.distanceKm - b.distanceKm)
+      .slice(0, 13);
+  }
+
   res.json({
     userLocation: { lat, lng },
     radiusKm,
