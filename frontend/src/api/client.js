@@ -1,8 +1,19 @@
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/$/, "");
+const configuredApiBase = import.meta.env.VITE_API_BASE_URL;
+const isNativeApp =
+  typeof window !== "undefined" &&
+  (window.location.protocol === "capacitor:" ||
+    Boolean(window.Capacitor));
+const API_BASE = (
+  configuredApiBase ||
+  (isNativeApp
+    ? "https://techconnect-zxoo.onrender.com/api"
+    : "/api")
+).replace(/\/$/, "");
 const TOKEN_KEY = "techconnect_token";
 const SECURITY_CODE_PREFIX = "techconnect_security_code_";
 const TRACKING_SPEED_KMPH = 22;
 const FALLBACK_RADIUS_KM = 50;
+const TECHNICIAN_CACHE_KEY = "techconnect_cached_technicians";
 
 export function getStoredToken() {
   return localStorage.getItem(TOKEN_KEY);
@@ -191,14 +202,32 @@ export async function fetchTechnicians({ lat, lng, radius, service, trustedOnly 
   if (service) params.set("service", service);
   if (trustedOnly) params.set("trusted", "true");
 
-  const res = await fetch(`${API_BASE}/technicians?${params}`);
-  const data = await res.json().catch(() => ({}));
+  try {
+    const res = await fetch(`${API_BASE}/technicians?${params}`);
+    const data = await res.json().catch(() => ({}));
 
-  if (!res.ok) {
-    throw new Error(data.error || "Failed to load technicians");
+    if (!res.ok) {
+      throw new Error(data.error || "Failed to load technicians");
+    }
+
+    localStorage.setItem(
+      TECHNICIAN_CACHE_KEY,
+      JSON.stringify({ technicians: data.technicians, cachedAt: Date.now() })
+    );
+    return data;
+  } catch (error) {
+    const cached = JSON.parse(localStorage.getItem(TECHNICIAN_CACHE_KEY) || "null");
+    if (cached?.technicians?.length) {
+      return {
+        userLocation: { lat, lng },
+        radiusKm: radius,
+        count: cached.technicians.length,
+        technicians: cached.technicians,
+        cached: true,
+      };
+    }
+    throw error;
   }
-
-  return data;
 }
 
 export async function fetchTechnicianById(technicianId, { lat, lng } = {}) {

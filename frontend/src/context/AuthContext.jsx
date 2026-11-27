@@ -9,9 +9,16 @@ import {
 } from "../api/client.js";
 
 const AuthContext = createContext(null);
+const CACHED_USER_KEY = "techconnect_cached_user";
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(CACHED_USER_KEY) || "null");
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
 
   const loadUser = useCallback(async () => {
@@ -25,9 +32,10 @@ export function AuthProvider({ children }) {
     try {
       const data = await fetchMe();
       setUser(data.user);
+      localStorage.setItem(CACHED_USER_KEY, JSON.stringify(data.user));
     } catch {
-      setStoredToken(null);
-      setUser(null);
+      const cachedUser = JSON.parse(localStorage.getItem(CACHED_USER_KEY) || "null");
+      setUser(cachedUser);
     } finally {
       setLoading(false);
     }
@@ -41,6 +49,7 @@ export function AuthProvider({ children }) {
     const data = await apiLogin(credentials);
     setStoredToken(data.token);
     setUser(data.user);
+    localStorage.setItem(CACHED_USER_KEY, JSON.stringify(data.user));
     return data.user;
   }, []);
 
@@ -48,6 +57,7 @@ export function AuthProvider({ children }) {
     const data = await apiRegister(payload);
     setStoredToken(data.token);
     setUser(data.user);
+    localStorage.setItem(CACHED_USER_KEY, JSON.stringify(data.user));
     return data.user;
   }, []);
 
@@ -58,6 +68,7 @@ export function AuthProvider({ children }) {
       // Clear local session even if API call fails
     }
     setStoredToken(null);
+    localStorage.removeItem(CACHED_USER_KEY);
     setUser(null);
   }, []);
 

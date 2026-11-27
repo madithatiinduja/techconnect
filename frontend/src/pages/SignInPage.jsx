@@ -95,10 +95,6 @@ export default function SignInPage() {
             </div>
           </form>
 
-          <div className="mt-8 text-center text-[28px] font-black italic text-red-500/75 tracking-[-0.05em]">
-            welcome
-          </div>
-
           <div className="mt-8 rounded-2xl border border-slate-200 bg-white/60 p-4 text-left text-sm text-slate-600">
             <p className="font-semibold text-slate-700">Demo accounts</p>
             <div className="mt-3 space-y-2">
@@ -109,7 +105,7 @@ export default function SignInPage() {
           </div>
 
           <p className="mt-7 text-center text-base leading-relaxed text-slate-600">
-            Before using this app, you can review <span className="font-semibold text-brand-600">base44.com&apos;s</span> Privacy Policy and Terms of Service.
+            Sign in securely to find trusted technicians and manage your bookings.
           </p>
 
           <div className="mt-6 flex justify-center">

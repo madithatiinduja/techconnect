@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { fetchTechnicians } from "../api/client.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import Header from "../components/Header.jsx";
-import BottomNavigation from "../components/BottomNavigation.jsx";
 import Hero from "../components/Hero.jsx";
 import ServiceCategories from "../components/ServiceCategories.jsx";
 import LocationRadiusPanel from "../components/LocationRadiusPanel.jsx";
@@ -11,7 +10,7 @@ import TechnicianList from "../components/TechnicianList.jsx";
 import Toast from "../components/Toast.jsx";
 
 const DEFAULT_LOCATION = { lat: 16.2322, lng: 80.5536 };
-const DEFAULT_RADIUS = 5;
+const DEFAULT_RADIUS = 50;
 
 export default function HomePage() {
   const { user, isClient } = useAuth();
@@ -165,7 +164,6 @@ export default function HomePage() {
           <p className="mt-1 text-xs text-slate-500">© 2026 TechConnect. All rights reserved.</p>
         </div>
       </footer>
-      <BottomNavigation />
     </div>
   );
 }

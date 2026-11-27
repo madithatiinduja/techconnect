@@ -149,6 +149,109 @@
       "serviceRadiusKm": 5,
       "requirements": null,
       "createdAt": "2026-09-22T09:10:44.969Z"
+    },
+    {
+      "id": "user-1795701434969",
+      "roles": [
+        "client"
+      ],
+      "name": "Madithati Induja",
+      "username": "",
+      "email": "madithatiinduja@gmail.com",
+      "password": "f2d8034a4440c4963a26c15f2aab993a:bd5da46f3561f71f56ce5543dbd9b9d25ae7fc7ca4c01cdfb080759b208427a767960505507dc49ef9bb09d43ac2ff4e784ea2d612059e8b208e2e40dd285c2e",
+      "phone": "9390719199",
+      "address": "lakshmipuram",
+      "lat": null,
+      "lng": null,
+      "city": "guntur",
+      "technicianId": null,
+      "service": "",
+      "experience": "",
+      "bio": "",
+      "available": false,
+      "serviceRadiusKm": 5,
+      "requirements": null,
+      "createdAt": "2026-11-26T13:57:15.128Z"
+    },
+    {
+      "id": "user-1795701575285",
+      "roles": [
+        "technician"
+      ],
+      "name": "Madithati Induja",
+      "username": "",
+      "email": "indujamadithati@gmail.com",
+      "password": "bd23e2fe3199916a5507032361af194e:d6c807693b414b802213fb394dcb58b7762fe17e6e66b84232ff7f0664f6f5f563dffe0823270d52d3d5b0e2a7ba3e832fde8434bd58210aab7913aa3b7e0f3f",
+      "phone": "9390719199",
+      "address": "#3-2-100, Ammavarishala street, pulivendula, kadapa district, Andhra pradesh",
+      "lat": null,
+      "lng": null,
+      "city": "Pulivendula",
+      "technicianId": "1795701575378",
+      "service": "Plumber",
+      "experience": "3",
+      "bio": "",
+      "available": true,
+      "serviceRadiusKm": 5,
+      "requirements": [
+        {
+          "id": "profile_photo",
+          "label": "Profile photo",
+          "description": "Upload a clear professional photo for your public profile.",
+          "required": true,
+          "completed": false
+        },
+        {
+          "id": "id_verification",
+          "label": "ID verification",
+          "description": "Submit a valid government ID (Aadhaar, PAN, or driving licence).",
+          "required": true,
+          "completed": false
+        },
+        {
+          "id": "service_category",
+          "label": "Primary service",
+          "description": "Select the main service category you offer.",
+          "required": true,
+          "completed": true
+        },
+        {
+          "id": "service_area",
+          "label": "Service area",
+          "description": "Set your base location and how far you are willing to travel.",
+          "required": true,
+          "completed": false
+        },
+        {
+          "id": "experience",
+          "label": "Experience details",
+          "description": "Add your years of experience and a short bio.",
+          "required": true,
+          "completed": false
+        },
+        {
+          "id": "background_check",
+          "label": "Background check consent",
+          "description": "Agree to TechConnect verification and background screening.",
+          "required": true,
+          "completed": false
+        },
+        {
+          "id": "availability",
+          "label": "Availability schedule",
+          "description": "Set your weekly working hours and availability status.",
+          "required": true,
+          "completed": true
+        },
+        {
+          "id": "payment_details",
+          "label": "Payment details",
+          "description": "Add bank account or UPI details to receive payouts.",
+          "required": false,
+          "completed": false
+        }
+      ],
+      "createdAt": "2026-11-26T13:59:35.378Z"
     }
   ],
   "orders": [
@@ -211,6 +314,10 @@
     "fc1a9fbc5fc73f0760d5bbd30ce7e1d1f3831c3fb0f9d007aad0bd6c15add8a9": {
       "userId": "user-admin-1",
       "createdAt": "2026-09-22T09:11:59.716Z"
+    },
+    "e0fe5b7d570a5ded734686f5a0a271779d5298fc721c6126e07fd772cd2d1220": {
+      "userId": "user-1795701575285",
+      "createdAt": "2026-11-26T13:59:35.380Z"
     }
   }
 }

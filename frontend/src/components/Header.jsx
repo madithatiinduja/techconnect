@@ -5,7 +5,7 @@ export default function Header() {
   const { user, logout, isClient, isTechnician, isAdmin } = useAuth();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl">
+    <header className="mobile-safe-top sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-8">
         <Link to="/" className="flex min-w-0 items-center gap-2.5 sm:gap-3">
           <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-base font-extrabold text-white shadow-glow sm:h-11 sm:w-11 sm:rounded-2xl sm:text-lg">

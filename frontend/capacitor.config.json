@@ -1,0 +1,10 @@
+{
+  "appId": "com.techconnect.app",
+  "appName": "TechConnect",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  }
+}

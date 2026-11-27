@@ -46,6 +46,10 @@ TechConnect is a two-sided marketplace platform that connects clients needing va
 - ✅ **Browser geolocation** integration with fallback to default location
 - ✅ **Bottom navigation** for easy mobile navigation
 - ✅ **Responsive UI** with Tailwind CSS
+- ✅ **Progressive Web App (PWA) installation** on supported Android browsers
+- ✅ **Offline app-shell caching** with a service worker
+- ✅ **Native Android packaging** with Capacitor
+- ✅ **Android location permissions** for geolocation-based technician search
 
 #### Backend Features
 - ✅ **RESTful API** with Express.js
@@ -67,6 +71,10 @@ TechConnect is a two-sided marketplace platform that connects clients needing va
 | **Frontend Build** | Vite 6.0 | Fast development & production builds |
 | **Styling** | Tailwind CSS 3.4 | Utility-first CSS framework |
 | **Routing** | React Router DOM 7.18 | Client-side navigation |
+| **Mobile/PWA** | Web App Manifest, Service Worker | Installable mobile experience and offline app shell |
+| **Android Wrapper** | Capacitor 7 | Packages the web app as an Android application |
+| **Android Build** | Gradle 8.11, Android SDK 35 | Builds debug and release APK/AAB packages |
+| **Java** | JDK 21 | Compiles the native Android project |
 | **Backend Runtime** | Node.js | JavaScript runtime |
 | **Backend Framework** | Express.js | Web server & API routing |
 | **HTTP/Middleware** | CORS | Cross-origin request handling |
@@ -146,7 +154,11 @@ techconnect/
 │       ├── constants/
 │       │   └── services.jsx         # Service categories (AC, Electrician, etc.)
 │       │
-│       └── android/                 # Android app build files (React Native)
+│       ├── android/                 # Generated Capacitor Android project
+│       ├── capacitor.config.json   # Native app ID, name, and web asset settings
+│       └── public/
+│           ├── manifest.json       # PWA installation metadata
+│           └── sw.js               # PWA service worker
 │
 ├── package.json                     # Root package scripts
 ├── .gitignore                       # Git ignore rules
@@ -461,6 +473,66 @@ npm run start    # Run production build
 npm run dev      # Start Vite dev server (port 5173)
 npm run build    # Build optimized production bundle
 npm run preview  # Preview production build locally
+npm run android:add    # Generate the Android project
+npm run android:sync   # Build the web app and sync Android assets
+npm run android:open   # Open the Android project in Android Studio
+```
+
+### Install as a Mobile App
+
+TechConnect can be installed from a supported mobile browser as a PWA:
+
+1. Open the deployed frontend in Chrome or Edge on Android.
+2. Open the browser menu and choose **Add to Home screen** or **Install app**.
+3. Launch TechConnect from the home screen for a full-screen mobile experience.
+
+To package the app as an Android application with Capacitor:
+
+```bash
+cd frontend
+npm install
+npm run android:add
+npm run android:sync
+npm run android:open
+```
+
+The Android project uses app ID `com.techconnect.app`, app name `TechConnect`,
+minimum Android SDK 23, and target Android SDK 35. Java 21, Android Studio,
+and the Android SDK are required to build or run the native project.
+
+Build a debug APK from PowerShell:
+
+```powershell
+cd frontend\android
+$env:JAVA_HOME="C:\Users\<username>\.jdks\jbr-21.0.11"
+$env:ANDROID_HOME="C:\Users\<username>\AppData\Local\Android\sdk"
+.\gradlew.bat assembleDebug
+```
+
+The generated test APK is available at:
+
+```text
+frontend/android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+### Android Phone Setup
+
+For local testing:
+
+1. Enable **Developer options** and **USB debugging** on the Android phone.
+2. Connect the phone over USB and accept the authorization prompt.
+3. Verify the device with `adb devices`.
+4. Install the APK:
+
+```powershell
+adb install -r "frontend\android\app\build\outputs\apk\debug\app-debug.apk"
+```
+
+The APK can also be transferred to the phone and opened from Files or Downloads.
+On recent Android versions, allow installation from that file source under:
+
+```text
+Settings > Apps > Special app access > Install unknown apps
 ```
 
 ---

@@ -5,6 +5,7 @@ import { haversineDistanceKm } from "./utils/distance.js";
 import authRoutes from "./routes/auth.js";
 import orderRoutes from "./routes/orders.js";
 import dashboardRoutes from "./routes/dashboard.js";
+import { store } from "./data/store.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -42,7 +43,40 @@ app.get("/api/technicians", (req, res) => {
     });
   }
 
-  let results = technicians.map((tech) => ({
+  const registeredTechnicians = store.users
+    .filter((user) => user.roles?.includes("technician") && user.service)
+    .map((user) => ({
+      id: user.technicianId || user.id,
+      name: user.name,
+      service: user.service,
+      rating: 4.8,
+      reviews: 0,
+      trusted: Boolean(
+        user.requirements?.every((requirement) => requirement.completed)
+      ),
+      experience: user.experience || "New",
+      price: 499,
+      lat: Number.isFinite(user.lat) ? user.lat : 16.2322,
+      lng: Number.isFinite(user.lng) ? user.lng : 80.5536,
+      city: user.city || "Guntur",
+      phone: user.phone || "",
+      available: user.available !== false,
+      image: `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(user.name)}`,
+    }));
+
+  const combinedTechnicians = [
+    ...technicians,
+    ...registeredTechnicians.filter(
+      (registered) =>
+        !technicians.some(
+          (seeded) =>
+            Number(seeded.id) === Number(registered.id) ||
+            seeded.name.toLowerCase() === registered.name.toLowerCase()
+        )
+    ),
+  ];
+
+  let results = combinedTechnicians.map((tech) => ({
     ...tech,
     distanceKm: Number(
       haversineDistanceKm(lat, lng, tech.lat, tech.lng).toFixed(2)
@@ -70,7 +104,29 @@ app.get("/api/technicians", (req, res) => {
 });
 
 app.get("/api/technicians/:id", (req, res) => {
-  const technician = findTechnicianById(req.params.id);
+  const registeredTechnician = store.users
+    .filter((user) => user.roles?.includes("technician") && user.service)
+    .find((user) => String(user.technicianId || user.id) === String(req.params.id));
+  const technician = registeredTechnician
+    ? {
+        id: registeredTechnician.technicianId || registeredTechnician.id,
+        name: registeredTechnician.name,
+        service: registeredTechnician.service,
+        rating: 4.8,
+        reviews: 0,
+        trusted: Boolean(
+          registeredTechnician.requirements?.every((requirement) => requirement.completed)
+        ),
+        experience: registeredTechnician.experience || "New",
+        price: 499,
+        lat: registeredTechnician.lat ?? 16.2322,
+        lng: registeredTechnician.lng ?? 80.5536,
+        city: registeredTechnician.city || "Guntur",
+        phone: registeredTechnician.phone || "",
+        available: registeredTechnician.available !== false,
+        image: `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(registeredTechnician.name)}`,
+      }
+    : findTechnicianById(req.params.id);
   if (!technician) {
     return res.status(404).json({ error: "Technician not found" });
   }

@@ -91,7 +91,7 @@ export default function BottomNavigation() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white/80 backdrop-blur-md safe-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white/95 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-md">
       <div className="mx-auto flex max-w-md items-center justify-around px-2 py-2">
         {navItems.map((item) => (
           <Link
