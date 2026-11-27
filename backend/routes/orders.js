@@ -59,6 +59,7 @@ router.post("/", requireRole("client"), (req, res) => {
     lng,
     scheduledAt,
     paymentMethod,
+    paymentStatus,
   } = req.body;
   const client = findUserById(req.user.id);
 
@@ -70,21 +71,15 @@ router.post("/", requireRole("client"), (req, res) => {
   if (!technician) {
     return res.status(404).json({ error: "Technician not found" });
   }
-  if (service !== technician.service) {
-    return res.status(400).json({ error: "The service does not match this technician" });
-  }
 
   const paymentMethodValue = paymentMethod || "cash";
-  if (!["cash", "phonepe"].includes(paymentMethodValue)) {
-    return res.status(400).json({ error: "Unsupported payment method" });
-  }
   const paymentStatusValue = "pending";
 
   const order = createOrder({
     clientId: client.id,
     technicianId: technician.id,
     technicianName: technician.name,
-    service: technician.service,
+    service,
     price: SERVICE_PRICE_INR,
     address: address || client.address,
     lat: lat ?? client.lat,
@@ -158,11 +153,6 @@ router.patch("/:id/payment", requireRole("admin"), (req, res) => {
   const order = findOrderById(req.params.id);
   if (!order) {
     return res.status(404).json({ error: "Order not found" });
-  }
-  if (order.paymentMethod === "phonepe" && order.paymentStatus !== "paid") {
-    return res.status(409).json({
-      error: "PhonePe payments are marked paid only after provider verification",
-    });
   }
 
   order.paymentStatus = "paid";

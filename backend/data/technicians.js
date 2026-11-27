@@ -201,7 +201,7 @@ export const technicians = [
     reviews: 1,
     trusted: true,
     experience: "1 year",
-    price: 1,
+    price: SERVICE_PRICE_INR,
     lat: 16.231,
     lng: 80.554,
     city: "Guntur",

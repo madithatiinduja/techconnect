@@ -303,7 +303,6 @@ export function getOrderView(order) {
       amount: Number(order.price) || 0,
       paidAt: order.paidAt || order.createdAt,
       submittedAt: order.paymentSubmittedAt || null,
-      transactionId: order.phonepeTransactionId || null,
     },
     securityCode: order.securityCode || generateSecurityCode(),
     technicianPhone: order.technicianPhone || technician?.phone || "",

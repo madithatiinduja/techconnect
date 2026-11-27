@@ -152,7 +152,7 @@ export default function AdminDashboard() {
                       <div className="text-left sm:text-right">
                         <p className="text-lg font-extrabold text-brand-700">₹{order.price}</p>
                         <p className="text-xs text-slate-500">{new Date(order.createdAt).toLocaleDateString()}</p>
-                        {order.paymentStatus !== "paid" && order.paymentMethod !== "phonepe" && (
+                        {order.paymentStatus !== "paid" && (
                           <button
                             type="button"
                             onClick={() => handleAcceptPayment(order.id)}
@@ -160,11 +160,6 @@ export default function AdminDashboard() {
                           >
                             Accept payment & booking
                           </button>
-                        )}
-                        {order.paymentStatus !== "paid" && order.paymentMethod === "phonepe" && (
-                          <p className="mt-2 text-xs font-medium text-slate-500">
-                            Waiting for PhonePe to verify payment.
-                          </p>
                         )}
                       </div>
                     </div>

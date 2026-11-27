@@ -10,7 +10,6 @@ import { haversineDistanceKm } from "./utils/distance.js";
 import authRoutes from "./routes/auth.js";
 import orderRoutes from "./routes/orders.js";
 import dashboardRoutes from "./routes/dashboard.js";
-import paymentRoutes from "./routes/payments.js";
 import { store } from "./data/store.js";
 
 const app = express();
@@ -169,7 +168,6 @@ app.get("/api/technicians/:id", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
-app.use("/api/payments", paymentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
 app.listen(PORT, () => {

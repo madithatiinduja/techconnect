@@ -368,14 +368,6 @@ export async function createOrder(payload) {
   });
 }
 
-export async function initiatePhonePePayment(orderId) {
-  return request(`/payments/phonepe/${orderId}`, { method: "POST" });
-}
-
-export async function checkPhonePePayment(orderId) {
-  return request(`/payments/phonepe/${orderId}/status`);
-}
-
 export async function fetchOrderById(orderId) {
   try {
     return await request(`/orders/${orderId}`);
