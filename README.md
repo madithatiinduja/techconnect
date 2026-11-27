@@ -50,6 +50,8 @@ TechConnect is a two-sided marketplace platform that connects clients needing va
 - ✅ **Offline app-shell caching** with a service worker
 - ✅ **Native Android packaging** with Capacitor
 - ✅ **Android location permissions** for geolocation-based technician search
+- ✅ **PhonePe hosted checkout integration** with server-side payment verification
+- ✅ **₹1 INR service pricing** (₹100 paise sent to the payment gateway)
 
 #### Backend Features
 - ✅ **RESTful API** with Express.js
@@ -75,6 +77,7 @@ TechConnect is a two-sided marketplace platform that connects clients needing va
 | **Android Wrapper** | Capacitor 7 | Packages the web app as an Android application |
 | **Android Build** | Gradle 8.11, Android SDK 35 | Builds debug and release APK/AAB packages |
 | **Java** | JDK 21 | Compiles the native Android project |
+| **Payments** | PhonePe Standard Checkout Node SDK | Server-created checkout and server-verified payment status |
 | **Backend Runtime** | Node.js | JavaScript runtime |
 | **Backend Framework** | Express.js | Web server & API routing |
 | **HTTP/Middleware** | CORS | Cross-origin request handling |
@@ -287,7 +290,7 @@ curl "http://localhost:5000/api/technicians?lat=16.235&lng=80.551&radius=5&servi
   reviews: 214,                             // Number of reviews
   trusted: true,                            // Verified badge
   experience: "6 years",                    // Years of experience
-  price: 499,                               // Hourly/service rate (₹)
+  price: 1,                                 // Service price (₹1 INR)
   lat: 16.235,                              // Latitude
   lng: 80.551,                              // Longitude
   city: "Guntur",
@@ -330,7 +333,7 @@ curl "http://localhost:5000/api/technicians?lat=16.235&lng=80.551&radius=5&servi
   status: "pending",                        // pending, accepted, in-progress, completed, cancelled
   scheduledDate: "2024-01-20",
   scheduledTime: "14:00",
-  price: 499,
+  price: 1,
   location: "123 Main St, Guntur",
   clientRating: 0,
   clientReview: "",
@@ -534,6 +537,31 @@ On recent Android versions, allow installation from that file source under:
 ```text
 Settings > Apps > Special app access > Install unknown apps
 ```
+
+### PhonePe Live Payments
+
+Every service is priced at **₹1 INR**. The backend sets the amount itself and
+sends `100` paise to PhonePe; it does not trust a price submitted by the app.
+PhonePe checkout status is verified by the backend before an order is marked
+paid. The app polls for the verified result after checkout.
+
+To enable live payments, configure these variables in the backend hosting
+provider (Render) under **Environment**. Get the values from the PhonePe
+merchant portal; do not commit them to the repository or place them in the
+frontend:
+
+| Variable | Value |
+|----------|-------|
+| `PHONEPE_CLIENT_ID` | Production client ID from PhonePe |
+| `PHONEPE_CLIENT_SECRET` | Production client secret from PhonePe |
+| `PHONEPE_CLIENT_VERSION` | Client version assigned in the merchant portal |
+| `PHONEPE_REDIRECT_URL` | Public frontend route base, e.g. `https://your-site.example/booking/order` |
+
+The backend appends the booking ID and `?payment=phonepe` to the redirect URL.
+After setting these variables, redeploy/restart the backend. A live PhonePe
+merchant account with Standard Checkout enabled is required; sandbox credentials
+will not work with the production integration. A successful payment is never
+assumed from the client-side redirect alone.
 
 ---
 

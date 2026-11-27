@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
-import { fetchOrderById } from "../api/client.js";
+import { Browser } from "@capacitor/browser";
+import { Link, useParams } from "react-router-dom";
+import {
+  checkPhonePePayment,
+  fetchOrderById,
+  initiatePhonePePayment,
+} from "../api/client.js";
 import BottomNavigation from "../components/BottomNavigation.jsx";
 import Header from "../components/Header.jsx";
 import OrderStatusBadge, { formatOrderDate } from "../components/OrderStatusBadge.jsx";
@@ -18,19 +23,31 @@ function formatEta(etaMinutes) {
   return minutes === 0 ? `${hours} hr` : `${hours} hr ${minutes} min`;
 }
 
-const UPI_PAYMENT_ID = "9390719199-2@ybl";
-
 export default function BookingTrackingPage() {
   const { orderId } = useParams();
-  const [searchParams] = useSearchParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [paymentError, setPaymentError] = useState("");
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   const loadOrder = useCallback(async () => {
     try {
       const response = await fetchOrderById(orderId);
-      setOrder(response.order);
+      let nextOrder = response.order;
+      if (
+        nextOrder.payment?.method === "phonepe" &&
+        nextOrder.payment?.status !== "paid"
+      ) {
+        try {
+          const paymentStatus = await checkPhonePePayment(orderId);
+          nextOrder = paymentStatus.order;
+          setPaymentError("");
+        } catch (paymentStatusError) {
+          setPaymentError(paymentStatusError.message);
+        }
+      }
+      setOrder(nextOrder);
       setError("");
     } catch (err) {
       setError(err.message);
@@ -38,6 +55,31 @@ export default function BookingTrackingPage() {
       setLoading(false);
     }
   }, [orderId]);
+
+  const continuePhonePePayment = async () => {
+    setPaymentLoading(true);
+    setPaymentError("");
+    try {
+      const payment = await initiatePhonePePayment(orderId);
+      if (!payment.checkoutUrl) {
+        await loadOrder();
+        return;
+      }
+
+      if (
+        window.location.protocol === "capacitor:" ||
+        window.Capacitor?.isNativePlatform?.()
+      ) {
+        await Browser.open({ url: payment.checkoutUrl });
+      } else {
+        window.location.assign(payment.checkoutUrl);
+      }
+    } catch (paymentStartError) {
+      setPaymentError(paymentStartError.message);
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadOrder();
@@ -52,14 +94,6 @@ export default function BookingTrackingPage() {
   }, [loadOrder]);
 
   const tracking = order?.tracking;
-  const paymentSubmitted = searchParams.get("payment") === "submitted";
-  const paymentQrUrl = useMemo(() => {
-    if (order?.payment?.method !== "upi") return "";
-    const encoded = encodeURIComponent(
-      `upi://pay?pa=${UPI_PAYMENT_ID}&pn=TechConnect Services&am=${Number(order.price) || 0}&cu=INR&tn=TechConnect booking - ${order.service || "service"}`
-    );
-    return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encoded}`;
-  }, [order?.payment?.method, order?.price, order?.service]);
   const telHref = useMemo(() => {
     const raw = order?.technicianPhone || "";
     return `tel:${raw.replace(/\s+/g, "")}`;
@@ -199,8 +233,8 @@ export default function BookingTrackingPage() {
                       <p className="text-[11px] font-medium text-slate-500">
                         {order.payment?.status === "paid"
                           ? "Paid"
-                          : order.payment?.submittedAt
-                            ? "Submitted, awaiting admin"
+                          : order.payment?.status === "failed"
+                            ? "Failed"
                             : "Pending"}
                       </p>
                     </div>
@@ -221,29 +255,30 @@ export default function BookingTrackingPage() {
               </section>
             </div>
 
-            {order.payment?.method === "upi" && order.payment?.status !== "paid" && !paymentSubmitted && (
+            {order.payment?.method === "phonepe" && order.payment?.status !== "paid" && (
               <section className="section-card">
-                <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:text-left">
-                  <div className="rounded-2xl border-4 border-slate-200 bg-white p-2">
-                    <img
-                      src={paymentQrUrl}
-                      alt="UPI payment QR code"
-                      className="h-44 w-44 object-contain"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
-                      Payment awaiting admin confirmation
-                    </p>
-                    <h2 className="mt-1 text-xl font-extrabold text-slate-900">
-                      Scan to pay Rs {order.price}
-                    </h2>
-                    <p className="mt-2 text-sm text-slate-500">
-                      Complete the UPI payment, then wait for the admin to accept the payment and booking.
-                    </p>
-                    <p className="mt-2 text-sm font-bold text-slate-700">{UPI_PAYMENT_ID}</p>
-                  </div>
-                </div>
+                <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
+                  PhonePe payment {order.payment?.status === "failed" ? "failed" : "pending"}
+                </p>
+                <h2 className="mt-1 text-xl font-extrabold text-slate-900">
+                  Pay ₹{order.price} securely with PhonePe
+                </h2>
+                <p className="mt-2 text-sm text-slate-500">
+                  The booking updates to paid after TechConnect verifies the transaction with PhonePe.
+                </p>
+                {paymentError && (
+                  <p className="mt-3 rounded-xl bg-rose-50 p-3 text-sm font-medium text-rose-700">
+                    {paymentError}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  onClick={continuePhonePePayment}
+                  disabled={paymentLoading}
+                  className="btn-primary mt-4 w-full sm:w-auto"
+                >
+                  {paymentLoading ? "Connecting to PhonePe..." : "Pay with PhonePe"}
+                </button>
               </section>
             )}
 

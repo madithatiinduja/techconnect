@@ -1,10 +1,16 @@
 import cors from "cors";
 import express from "express";
-import { findTechnicianById, technicians, services } from "./data/technicians.js";
+import {
+  findTechnicianById,
+  SERVICE_PRICE_INR,
+  technicians,
+  services,
+} from "./data/technicians.js";
 import { haversineDistanceKm } from "./utils/distance.js";
 import authRoutes from "./routes/auth.js";
 import orderRoutes from "./routes/orders.js";
 import dashboardRoutes from "./routes/dashboard.js";
+import paymentRoutes from "./routes/payments.js";
 import { store } from "./data/store.js";
 
 const app = express();
@@ -55,7 +61,7 @@ app.get("/api/technicians", (req, res) => {
         user.requirements?.every((requirement) => requirement.completed)
       ),
       experience: user.experience || "New",
-      price: 499,
+      price: SERVICE_PRICE_INR,
       lat: Number.isFinite(user.lat) ? user.lat : 16.2322,
       lng: Number.isFinite(user.lng) ? user.lng : 80.5536,
       city: user.city || "Guntur",
@@ -78,6 +84,7 @@ app.get("/api/technicians", (req, res) => {
 
   let results = combinedTechnicians.map((tech) => ({
     ...tech,
+    price: SERVICE_PRICE_INR,
     distanceKm: Number(
       haversineDistanceKm(lat, lng, tech.lat, tech.lng).toFixed(2)
     ),
@@ -99,6 +106,7 @@ app.get("/api/technicians", (req, res) => {
     results = combinedTechnicians
       .map((tech) => ({
         ...tech,
+        price: SERVICE_PRICE_INR,
         distanceKm: Number(
           haversineDistanceKm(lat, lng, tech.lat, tech.lng).toFixed(2)
         ),
@@ -130,7 +138,7 @@ app.get("/api/technicians/:id", (req, res) => {
           registeredTechnician.requirements?.every((requirement) => requirement.completed)
         ),
         experience: registeredTechnician.experience || "New",
-        price: 499,
+        price: SERVICE_PRICE_INR,
         lat: registeredTechnician.lat ?? 16.2322,
         lng: registeredTechnician.lng ?? 80.5536,
         city: registeredTechnician.city || "Guntur",
@@ -153,6 +161,7 @@ app.get("/api/technicians/:id", (req, res) => {
   res.json({
     technician: {
       ...technician,
+      price: SERVICE_PRICE_INR,
       distanceKm,
     },
   });
@@ -160,6 +169,7 @@ app.get("/api/technicians/:id", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/payments", paymentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
 app.listen(PORT, () => {

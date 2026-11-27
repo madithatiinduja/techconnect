@@ -16,18 +16,18 @@ const FALLBACK_RADIUS_KM = 50;
 const TECHNICIAN_CACHE_KEY = "techconnect_cached_technicians";
 
 const BUILTIN_TECHNICIANS = [
-  ["Venkata Sai", "AC Repair", 4.8, 499, true],
-  ["Sravani Reddy", "Electrician", 4.9, 399, true],
-  ["Naga Babu", "Plumber", 4.6, 349, true],
-  ["Keerthana Chowdary", "Electrician", 4.7, 449, false],
-  ["Prudhvi Naidu", "Appliance Repair", 4.5, 299, true],
-  ["Bhavani Devi", "Carpenter", 4.8, 599, true],
-  ["Sai Kiran", "AC Repair", 4.4, 449, true],
-  ["Harika Yelamanchili", "Painter", 4.9, 499, true],
-  ["Srinivas Rao", "Cleaning", 4.6, 399, true],
-  ["Padmaja", "Pest Control", 4.7, 549, true],
-  ["Manikanta", "Carpenter", 4.5, 479, true],
-  ["Anusha Lakshmi", "Plumber", 4.8, 369, true],
+  ["Venkata Sai", "AC Repair", 4.8, 1, true],
+  ["Sravani Reddy", "Electrician", 4.9, 1, true],
+  ["Naga Babu", "Plumber", 4.6, 1, true],
+  ["Keerthana Chowdary", "Electrician", 4.7, 1, false],
+  ["Prudhvi Naidu", "Appliance Repair", 4.5, 1, true],
+  ["Bhavani Devi", "Carpenter", 4.8, 1, true],
+  ["Sai Kiran", "AC Repair", 4.4, 1, true],
+  ["Harika Yelamanchili", "Painter", 4.9, 1, true],
+  ["Srinivas Rao", "Cleaning", 4.6, 1, true],
+  ["Padmaja", "Pest Control", 4.7, 1, true],
+  ["Manikanta", "Carpenter", 4.5, 1, true],
+  ["Anusha Lakshmi", "Plumber", 4.8, 1, true],
 ].map(([name, service, rating, price, available], index) => ({
   id: index + 1,
   name,
@@ -273,11 +273,15 @@ export async function fetchTechnicians({ lat, lng, radius, service, trustedOnly 
       return buildLocalFallback(lat, lng, radius, service, trustedOnly);
     }
 
+    const technicians = data.technicians.map((technician) => ({
+      ...technician,
+      price: 1,
+    }));
     localStorage.setItem(
       TECHNICIAN_CACHE_KEY,
-      JSON.stringify({ technicians: data.technicians, cachedAt: Date.now() })
+      JSON.stringify({ technicians, cachedAt: Date.now() })
     );
-    return data;
+    return { ...data, technicians, count: technicians.length };
   } catch (error) {
     const cached = JSON.parse(localStorage.getItem(TECHNICIAN_CACHE_KEY) || "null");
     if (cached?.technicians?.length) {
@@ -306,7 +310,11 @@ export async function fetchTechnicianById(technicianId, { lat, lng } = {}) {
 
   const suffix = params.toString() ? `?${params}` : "";
   try {
-    return await request(`/technicians/${technicianId}${suffix}`);
+    const data = await request(`/technicians/${technicianId}${suffix}`);
+    return {
+      ...data,
+      technician: { ...data.technician, price: 1 },
+    };
   } catch (error) {
     if (lat === undefined || lat === null || lng === undefined || lng === null) {
       throw error;
@@ -358,6 +366,14 @@ export async function createOrder(payload) {
     method: "POST",
     body: JSON.stringify(payload),
   });
+}
+
+export async function initiatePhonePePayment(orderId) {
+  return request(`/payments/phonepe/${orderId}`, { method: "POST" });
+}
+
+export async function checkPhonePePayment(orderId) {
+  return request(`/payments/phonepe/${orderId}/status`);
 }
 
 export async function fetchOrderById(orderId) {
