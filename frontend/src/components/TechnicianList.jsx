@@ -25,6 +25,7 @@ function SkeletonCard() {
 
 export default function TechnicianList({
   technicians,
+  sampleTechnicians,
   loading,
   error,
   onBook,
@@ -41,7 +42,11 @@ export default function TechnicianList({
         <div className="min-w-0">
           <h3 className="section-title">{countLabel}</h3>
           {!loading && technicians.length > 0 && (
-            <p className="section-subtitle">Sorted by distance from you</p>
+            <p className="section-subtitle">
+              {sampleTechnicians
+                ? "Sample technicians shown because none are registered nearby."
+                : "Sorted by distance from you"}
+            </p>
           )}
         </div>
         {hasActiveFilter && (

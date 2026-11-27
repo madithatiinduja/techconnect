@@ -20,6 +20,7 @@ export default function HomePage() {
   const [trustedOnly, setTrustedOnly] = useState(false);
   const [location, setLocation] = useState(DEFAULT_LOCATION);
   const [technicians, setTechnicians] = useState([]);
+  const [sampleTechnicians, setSampleTechnicians] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [error, setError] = useState("");
@@ -66,8 +67,10 @@ export default function HomePage() {
         trustedOnly,
       });
       setTechnicians(data.technicians);
+      setSampleTechnicians(Boolean(data.sampleData));
     } catch (err) {
       setTechnicians([]);
+      setSampleTechnicians(false);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -150,6 +153,7 @@ export default function HomePage() {
 
         <TechnicianList
           technicians={technicians}
+          sampleTechnicians={sampleTechnicians}
           loading={loading}
           error={error}
           onBook={handleBook}

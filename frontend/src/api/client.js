@@ -70,6 +70,7 @@ function buildLocalFallback(lat, lng, radius, service, trustedOnly) {
     count: technicians.length,
     technicians,
     cached: true,
+    sampleData: true,
   };
 }
 
@@ -268,6 +269,10 @@ export async function fetchTechnicians({ lat, lng, radius, service, trustedOnly 
       throw new Error(data.error || "Failed to load technicians");
     }
 
+    if (!data.technicians?.length) {
+      return buildLocalFallback(lat, lng, radius, service, trustedOnly);
+    }
+
     localStorage.setItem(
       TECHNICIAN_CACHE_KEY,
       JSON.stringify({ technicians: data.technicians, cachedAt: Date.now() })
@@ -286,6 +291,7 @@ export async function fetchTechnicians({ lat, lng, radius, service, trustedOnly 
         count: technicians.length,
         technicians,
         cached: true,
+        sampleData: false,
         };
       }
     }
